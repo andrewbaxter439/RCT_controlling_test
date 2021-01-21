@@ -3,14 +3,16 @@ library(tidyverse)
 
 # A rough population with a series of covariates --------------------------
 
-sample <- tibble(id = 1:1000,
-                 sex = sample(c(1, 0), 1000, replace = TRUE),
-                 age = sample(18:80, 1000, replace = TRUE, prob = dnorm(seq(18, 80, by = 1), mean = 45, sd = 15)),
-                 cont1 = rpois(1000, 15),
-                 cont2 = log(abs(rnorm(1000, 4, 1))),
-                 cont3 = rnorm(1000, 15, 3),
-                 disc1 = sample(c(1, 0), 1000, replace = TRUE, prob = c(0.2, 0.8)),
-                 disc2 = sample(c(1, 0), 1000, replace = TRUE, prob = c(0.35, 0.65))
+N <- 200
+
+sample <- tibble(id = 1:N,
+                 sex = sample(c(1, 0), N, replace = TRUE),
+                 age = sample(18:80, N, replace = TRUE, prob = dnorm(seq(18, 80, by = 1), mean = 45, sd = 15)),
+                 cont1 = rpois(N, 15),
+                 cont2 = log(abs(rnorm(N, 4, 1))),
+                 cont3 = rnorm(N, 15, 3),
+                 disc1 = sample(c(1, 0), N, replace = TRUE, prob = c(0.2, 0.8)),
+                 disc2 = sample(c(1, 0), N, replace = TRUE, prob = c(0.35, 0.65))
 )
 
 
@@ -22,9 +24,9 @@ sample <- tibble(id = 1:1000,
 
 trial_pop <- sample %>% 
   rowwise() %>% 
-  mutate(potential_outcome = 0.03*age + 0.2*cont2 + 0.5*cont3 + 0.6*disc1 + 0.4*disc2,
+  mutate(potential_outcome = 0.03*age + 0.2*cont2 + 0.5*cont3 + 0.6*disc1 + 0.4*disc2 + rnorm(1, sd = 10) + 40,
          exposed = sample(c(1, 0), 1),
-         outcome = potential_outcome - 2*exposed + rnorm(1, sd = 1)*exposed)
+         outcome = potential_outcome - 7*exposed + rnorm(1, sd = 7)*exposed)
 
 # Baseline variables (Table 1)
 trial_pop %>% 
@@ -63,7 +65,8 @@ t.test(outcome ~ exposed, data = trial_pop)
 
 # lm controlling for all covariates
 
-lm(outcome ~ exposed + sex + cont1 + cont2 + cont3 + disc1 + disc2, data = trial_pop) %T>%
+lm(outcome ~ exposed + age + sex + cont1 + cont2 + cont3 + disc1 + disc2, data = trial_pop) %T>%
   {print(summary(.))} %>% 
   {cat("Confidence Intervals:\n")
     confint(.)}
+
