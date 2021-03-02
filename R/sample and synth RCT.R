@@ -24,9 +24,9 @@ sample <- tibble(id = 1:N,
 
 trial_pop <- sample %>% 
   rowwise() %>% 
-  mutate(potential_outcome = 0.03*age + 0.2*cont2 + 0.5*cont3 + 0.6*disc1 + 0.4*disc2 + rnorm(1, sd = 10) + 40,
+  mutate(potential_outcome = 0.03*age + 0.2*cont2 + 0.5*cont3 + 0.6*disc1 + 0.4*disc2 + rnorm(1, sd = 30) + 40,
          exposed = sample(c(1, 0), 1),
-         outcome = potential_outcome - 7*exposed + rnorm(1, sd = 7)*exposed)
+         outcome = potential_outcome - 8*exposed + rnorm(1, sd = 3)*exposed)
 
 # Baseline variables (Table 1)
 trial_pop %>% 
